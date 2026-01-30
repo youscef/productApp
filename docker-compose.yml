@@ -1,0 +1,25 @@
+version: "3.9"  # tu peux mettre la version moderne, pas obligatoire
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db  # <== volume défini ci-dessous
+
+  backend:
+    build: .                 # construit depuis ton Dockerfile local
+    container_name: productapp-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    environment:
+      SPRING_DATA_MONGODB_HOST: mongo
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: productdb
+
+volumes:
+  mongo-data:   # 
