@@ -1,4 +1,4 @@
-version: "3.9"  # tu peux mettre la version moderne, pas obligatoire
+version: "3.9"
 
 services:
   mongo:
@@ -7,19 +7,24 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db  # <== volume défini ci-dessous
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build: .                 # construit depuis ton Dockerfile local
+    image: usovix/productapp:latest
+    build: .
     container_name: productapp-backend
     ports:
       - "8080:8080"
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     environment:
-      SPRING_DATA_MONGODB_HOST: mongo
-      SPRING_DATA_MONGODB_PORT: 27017
-      SPRING_DATA_MONGODB_DATABASE: productdb
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/productdb
 
 volumes:
-  mongo-data:   # 
+  mongo-data:
